@@ -27,7 +27,15 @@
         {
           treefmt = {
             programs.nixfmt.enable = true;
-            programs.stylua.enable = true;
+            programs.stylua = {
+              enable = true;
+              settings = {
+                indent_type = "Spaces";
+                # I like to be free-form with my parens, I don't think it hurts
+                # readability much
+                call_parentheses = "Input";
+              };
+            };
           };
           packages.default = pkgs.wrapNeovimUnstable pkgs.neovim-unwrapped {
             luaRcContent =
