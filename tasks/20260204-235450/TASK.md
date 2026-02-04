@@ -1,6 +1,6 @@
 # Do not error out when some tasks are invalid
 
-- STATE: OPEN
+- STATE: CLOSED
 - PRIORITY: 80
 
 Currently, when for example the tasks directory contains a task where the title

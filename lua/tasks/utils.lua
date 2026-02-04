@@ -2,6 +2,16 @@ local a = vim.api
 
 local M = {}
 
+function M.nil_if_error(fn)
+    vim.validate("fn", fn, "function")
+    return function(...)
+        local ok, res = pcall(fn, ...)
+        if ok then
+            return res
+        end
+    end
+end
+
 function M.get_line()
     local row, _ = unpack(a.nvim_win_get_cursor(0))
     return a.nvim_buf_get_lines(0, row - 1, row, true)[1]
@@ -58,11 +68,22 @@ function M.get_task_path_by_huid(huid, create)
 end
 
 function M.get_task_title(absolute_path)
-    return string.match(io.lines(absolute_path)(), "^# (.*)")
+    if type(absolute_path) ~= "string" then
+        return
+    end
+    local ok, res = pcall(function()
+        return string.match(io.lines(absolute_path)(), "^# (.*)")
+    end)
+    if ok then
+        return res
+    end
 end
 
 function M.get_task_field(field)
     return function(absolute_path)
+        if type(absolute_path) ~= "string" then
+            return
+        end
         for line in io.lines(absolute_path) do
             local match = string.match(line, ("^- %s: (.*)"):format(field))
             if match then
@@ -72,8 +93,8 @@ function M.get_task_field(field)
     end
 end
 
-M.get_task_priority = M.get_task_field("PRIORITY")
-M.get_task_state = M.get_task_field("STATE")
+M.get_task_priority = M.nil_if_error(M.get_task_field("PRIORITY"))
+M.get_task_state = M.nil_if_error(M.get_task_field("STATE"))
 
 function M.create_task(opts)
     vim.validate("opts.title", opts.title, "string")
@@ -107,14 +128,21 @@ function M.list_tasks(filter)
     local iter = vim.iter(vim.fs.dir(database)):map(function(x, _)
         local task_dir = vim.fs.joinpath(database, x)
         local task_file = vim.fs.joinpath(task_dir, "TASK.md")
-        return {
-            huid = x,
-            task_dir = task_dir,
-            task_file = task_file,
-            title = M.get_task_title(task_file),
-            priority = tonumber(M.get_task_priority(task_file)),
-            state = M.get_task_state(task_file),
-        }
+
+        local title = M.get_task_title(task_file)
+        local state = M.get_task_state(task_file)
+        local priority = tonumber(M.get_task_priority(task_file) or 50)
+
+        if title and state then
+            return {
+                huid = x,
+                task_dir = task_dir,
+                task_file = task_file,
+                title = title,
+                priority = priority,
+                state = state,
+            }
+        end
     end)
 
     if type(filter) == "function" then
