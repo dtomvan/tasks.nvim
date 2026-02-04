@@ -25,7 +25,7 @@ function M.get_database()
     end
 end
 
-function M.get_task_by_huid(huid, create)
+function M.get_task_path_by_huid(huid, create)
     vim.validate("huid", huid, "string")
     vim.validate("create", create, { "nil", "boolean" })
 
@@ -46,11 +46,29 @@ function M.get_task_by_huid(huid, create)
     return task_md_path
 end
 
+function M.get_task_title(absolute_path)
+    return string.match(io.lines(absolute_path)(), "^# (.*)")
+end
+
+function M.get_task_field(field)
+    return function(absolute_path)
+        for line in io.lines(absolute_path) do
+            local match = string.match(line, ("^- %s: (.*)"):format(field))
+            if match then
+                return match
+            end
+        end
+    end
+end
+
+M.get_task_priority = M.get_task_field("PRIORITY")
+M.get_task_state = M.get_task_field("STATE")
+
 function M.create_task(opts)
     vim.validate("opts.title", opts.title, "string")
     vim.validate("opts.huid", opts.huid, { "nil", "string" })
 
-    local task_file = M.get_task_by_huid(opts.huid or M.get_huid(), true)
+    local task_file = M.get_task_path_by_huid(opts.huid or M.get_huid(), true)
     vim.cmd.split(task_file)
     vim.schedule(function()
         a.nvim_buf_set_lines(0, 0, -1, false, {
@@ -65,6 +83,38 @@ function M.create_task(opts)
         a.nvim_win_set_cursor(0, { line_count, 0 })
         vim.api.nvim_feedkeys("i", "nt", false)
     end)
+end
+
+function M.list_tasks(filter)
+    vim.validate("filter", filter, { "nil", "function" })
+
+    local database = M.get_database()
+    if not database then
+        return vim.notify("Tasks: no database found", vim.log.levels.ERROR)
+    end
+
+    local iter = vim.iter(vim.fs.dir(database)):map(function(x, _)
+        local task_dir = vim.fs.joinpath(database, x)
+        local task_file = vim.fs.joinpath(task_dir, "TASK.md")
+        return {
+            huid = x,
+            task_dir = task_dir,
+            task_file = task_file,
+            title = M.get_task_title(task_file),
+            priority = tonumber(M.get_task_priority(task_file)),
+            state = M.get_task_state(task_file),
+        }
+    end)
+
+    if type(filter) == "function" then
+        iter:filter(filter)
+    end
+
+    local res = iter:totable()
+    table.sort(res, function(x, y)
+        return x.priority > y.priority
+    end)
+    return res
 end
 
 return M

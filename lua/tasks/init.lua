@@ -1,4 +1,4 @@
-local utils = require 'tasks.utils'
+local utils = require "tasks.utils"
 
 local a = vim.api
 
