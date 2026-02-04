@@ -8,6 +8,8 @@ local function get_line()
 end
 
 local function set_line(line)
+    vim.validate("line", line, 'string')
+
     local row, _ = unpack(a.nvim_win_get_cursor(0))
     return a.nvim_buf_set_lines(0, row - 1, row, true, { line })
 end
@@ -22,6 +24,9 @@ local function get_database()
 end
 
 local function get_task_by_huid(huid, create)
+    vim.validate('huid', huid, 'string')
+    vim.validate('create', create, { 'nil', 'boolean' })
+
     local db = get_database()
     if not db then return vim.notify("Tasks: no database found", vim.log.levels.ERROR) end
 
@@ -38,6 +43,9 @@ local function get_task_by_huid(huid, create)
 end
 
 local function create_task(opts)
+    vim.validate('opts.title', opts.title, 'string')
+    vim.validate('opts.huid', opts.huid, { 'nil', 'string' })
+
     local task_file = get_task_by_huid(opts.huid or get_huid(), true)
     vim.cmd.split(task_file)
     vim.schedule(function()
