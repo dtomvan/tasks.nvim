@@ -14,8 +14,19 @@ function M.set_line(line)
     return a.nvim_buf_set_lines(0, row - 1, row, true, { line })
 end
 
+function M.get_utc(localtime)
+    ---@diagnostic disable-next-line: param-type-mismatch
+    local sgn, h_offset, m_offset = os.date("%z"):match("([+-])(%d%d)(%d%d)")
+    if sgn == "+" then sgn = 1 else sgn = -1 end
+    h_offset = tonumber(h_offset)
+    m_offset = tonumber(m_offset)
+
+    local offset = ((h_offset * 3600) + (m_offset * 60)) * sgn;
+    return (localtime or os.time()) - offset
+end
+
 function M.get_huid()
-    return os.date("%Y%m%d-%H%M%S")
+    return os.date("%Y%m%d-%H%M%S", M.get_utc())
 end
 
 function M.get_database()
