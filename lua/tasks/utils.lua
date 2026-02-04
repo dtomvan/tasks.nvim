@@ -57,7 +57,7 @@ function M.create_task(opts)
             ("# %s"):format(opts.title),
             "",
             "- STATE: OPEN",
-            "- priority: 50",
+            "- PRIORITY: 50",
             "",
             "",
         })

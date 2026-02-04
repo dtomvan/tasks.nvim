@@ -1,6 +1,6 @@
 # write some useful tasks
 
 - STATE: OPEN
-- priority: 50
+- PRIORITY: 50
 
 Yes.
