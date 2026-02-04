@@ -8,7 +8,7 @@ local function get_line()
 end
 
 local function set_line(line)
-    vim.validate("line", line, 'string')
+    vim.validate("line", line, "string")
 
     local row, _ = unpack(a.nvim_win_get_cursor(0))
     return a.nvim_buf_set_lines(0, row - 1, row, true, { line })
@@ -20,15 +20,19 @@ end
 
 local function get_database()
     local root_dir = vim.fs.root(0, ".git")
-    if root_dir then return vim.fs.joinpath(root_dir, "tasks") end
+    if root_dir then
+        return vim.fs.joinpath(root_dir, "tasks")
+    end
 end
 
 local function get_task_by_huid(huid, create)
-    vim.validate('huid', huid, 'string')
-    vim.validate('create', create, { 'nil', 'boolean' })
+    vim.validate("huid", huid, "string")
+    vim.validate("create", create, { "nil", "boolean" })
 
     local db = get_database()
-    if not db then return vim.notify("Tasks: no database found", vim.log.levels.ERROR) end
+    if not db then
+        return vim.notify("Tasks: no database found", vim.log.levels.ERROR)
+    end
 
     local task_path = vim.fs.joinpath(db, huid)
     local task_md_path = vim.fs.joinpath(task_path, "TASK.md")
@@ -43,8 +47,8 @@ local function get_task_by_huid(huid, create)
 end
 
 local function create_task(opts)
-    vim.validate('opts.title', opts.title, 'string')
-    vim.validate('opts.huid', opts.huid, { 'nil', 'string' })
+    vim.validate("opts.title", opts.title, "string")
+    vim.validate("opts.huid", opts.huid, { "nil", "string" })
 
     local task_file = get_task_by_huid(opts.huid or get_huid(), true)
     vim.cmd.split(task_file)
@@ -75,14 +79,18 @@ function M.go_to()
     local line = get_line()
     local huid = string.match(line, "TASK%((.*)%)")
     local ok, task_file = pcall(get_task_by_huid, huid, false)
-    if not ok then return vim.notify(("Tasks: no task with HUID %s"):format(huid), vim.log.levels.ERROR) end
+    if not ok then
+        return vim.notify(("Tasks: no task with HUID %s"):format(huid), vim.log.levels.ERROR)
+    end
     vim.cmd.split(task_file)
 end
 
 function M.create_from_todo()
     local line = get_line()
     local prefix, suffix = string.match(line, "(.*)TODO:(.*)")
-    if not prefix then return end -- silently do nothing is it doesn't make any sense
+    if not prefix then
+        return
+    end -- silently do nothing is it doesn't make any sense
     ---@diagnostic disable-next-line: redefined-local
     local suffix = vim.trim(suffix)
 
@@ -97,7 +105,7 @@ local function add_commands()
         TasksGoto = M.go_to,
         TasksCreateFromTODO = M.create_from_todo,
     } do
-        a.nvim_create_user_command(name, fn, { force = true, })
+        a.nvim_create_user_command(name, fn, { force = true })
     end
 end
 
