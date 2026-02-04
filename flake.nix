@@ -20,7 +20,12 @@
       imports = [ inputs.treefmt-nix.flakeModule ];
 
       perSystem =
-        { pkgs, lib, ... }:
+        {
+          pkgs,
+          lib,
+          self',
+          ...
+        }:
         let
           inherit (lib.fileset) toSource unions;
         in
@@ -37,6 +42,7 @@
               };
             };
           };
+
           packages.default = pkgs.wrapNeovimUnstable pkgs.neovim-unwrapped {
             luaRcContent =
               #lua
@@ -64,6 +70,19 @@
               }
             );
           };
+
+          checks.loadCheck =
+            pkgs.runCommand "load-tasks.nvim"
+              {
+                nativeBuildInputs = with pkgs; [
+                  coreutils
+                  self'.packages.default
+                ];
+              }
+              ''
+                export HOME=`mktemp -d`
+                nvim +'norm iHello, World!' +"w $out" +q
+              '';
         };
     };
 }
