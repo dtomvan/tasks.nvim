@@ -28,6 +28,8 @@ function M.picker(opts)
                         display = ("<%03d> [%s] %s"):format(entry.priority, entry.huid, entry.title),
                         ordinal = ("%03d %s %s"):format(entry.priority, entry.huid, entry.title),
                         path = entry.task_file,
+                        lnum = 1, -- where the title goes, for quickfixlist purposes
+                        text = "# " .. entry.title,
                     }
                 end,
             },
