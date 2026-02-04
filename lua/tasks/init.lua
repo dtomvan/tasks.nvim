@@ -37,6 +37,31 @@ local function get_task_by_huid(huid, create)
     return task_md_path
 end
 
+local function create_task(opts)
+    local task_file = get_task_by_huid(opts.huid or get_huid(), true)
+    vim.cmd.split(task_file)
+    vim.schedule(function()
+        a.nvim_buf_set_lines(0, 0, -1, false, {
+            ("# %s"):format(opts.title),
+            "",
+            "- STATE: OPEN",
+            "- priority: 50",
+            "",
+            "",
+        })
+        local line_count = vim.api.nvim_buf_line_count(0)
+        a.nvim_win_set_cursor(0, { line_count, 0 })
+        vim.api.nvim_feedkeys("i", "nt", false)
+    end)
+end
+
+function M.new()
+    vim.ui.input({ prompt = "Enter title for task: ", default = "TODO" }, function(title)
+        create_task {
+            title = title,
+        }
+    end)
+end
 
 function M.go_to()
     local line = get_line()
@@ -55,27 +80,17 @@ function M.create_from_todo()
 
     local huid = get_huid()
     set_line(prefix .. ("TASK(%s): "):format(huid) .. suffix)
-
-    local task_file = get_task_by_huid(huid, true)
-    vim.cmd.split(task_file)
-    vim.schedule(function()
-        a.nvim_buf_set_lines(0, 0, -1, false, {
-            ("# %s"):format(suffix),
-            "",
-            "- STATE: OPEN",
-            "- priority: 50",
-            "",
-            "",
-        })
-        local line_count = vim.api.nvim_buf_line_count(0)
-        a.nvim_win_set_cursor(0, { line_count, 0 })
-        vim.api.nvim_feedkeys("i", "nt", false)
-    end)
+    create_task({ title = suffix })
 end
 
 local function add_commands()
-    a.nvim_create_user_command("TasksGoto", M.go_to, { force = true, })
-    a.nvim_create_user_command("TasksCreateFromTODO", M.create_from_todo, { force = true, })
+    for name, fn in pairs {
+        TasksNew = M.new,
+        TasksGoto = M.go_to,
+        TasksCreateFromTODO = M.create_from_todo,
+    } do
+        a.nvim_create_user_command(name, fn, { force = true, })
+    end
 end
 
 function M.setup(opts)
