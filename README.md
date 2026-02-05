@@ -63,7 +63,7 @@ in your nixvim configuration.
 { inputs, ... }:
 {
   programs.nixvim = {
-    imports = [ inputs.tasks.modules.nixvim ];
+    imports = [ inputs.tasks.modules.nixvim.default ];
     plugins.tasks = {
       enable = true;
       withTelescope = true;
