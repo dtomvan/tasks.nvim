@@ -10,7 +10,12 @@
       ...
     }:
     let
+      inherit (lib.nixvim.lua) toLua;
+
       cfg = config.plugins.tasks;
+      settingsModule.options = {
+        add_commands = lib.mkEnableOption "Neovim user commands for tasks.nvim (e.g. TasksNew, TasksGoto)";
+      };
     in
     {
       options.plugins.tasks = {
@@ -20,13 +25,17 @@
           default = self.packages.${pkgs.stdenv.hostPlatform.system}.plugin;
           type = lib.types.package;
         };
-        # TODO: add settings, how to serialize to lua?
+        settings = lib.mkOption {
+          description = "settings to pass to `require'tasks'.setup { ... }`";
+          type = lib.types.submodule settingsModule;
+        };
         withTelescope = lib.mkEnableOption "telescope integration for tasks.nvim";
         withCmp = lib.mkEnableOption "nvim-cmp integration for tasks.nvim";
       };
+
       config = lib.mkIf cfg.enable {
         extraConfigLuaPost = ''
-          require'tasks'.setup { add_commands = true }
+          require'tasks'.setup(${toLua cfg.settings})
         '';
 
         extraPlugins = lib.singleton cfg.package;

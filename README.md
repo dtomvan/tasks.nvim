@@ -64,6 +64,9 @@ in your nixvim configuration.
       enable = true;
       withTelescope = true;
       withCmp = true;
+      settings = {
+        add_commands = true;
+      };
     };
   };
 }
