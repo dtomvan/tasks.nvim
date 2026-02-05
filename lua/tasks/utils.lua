@@ -27,11 +27,15 @@ end
 function M.get_utc(localtime)
     ---@diagnostic disable-next-line: param-type-mismatch
     local sgn, h_offset, m_offset = os.date("%z"):match("([+-])(%d%d)(%d%d)")
-    if sgn == "+" then sgn = 1 else sgn = -1 end
+    if sgn == "+" then
+        sgn = 1
+    else
+        sgn = -1
+    end
     h_offset = tonumber(h_offset)
     m_offset = tonumber(m_offset)
 
-    local offset = ((h_offset * 3600) + (m_offset * 60)) * sgn;
+    local offset = ((h_offset * 3600) + (m_offset * 60)) * sgn
     return (localtime or os.time()) - offset
 end
 
