@@ -20,7 +20,7 @@ There's an ephemeral NVim installation available in the Nix flake.
 
 Run `nix run` to test out your changes manually.
 
-Run `nix flake check` to just check that the plugin loads.
+Run `nix flake check` to just check that the plugin loads and some rudimentary integration tests pass.
 
 ## Formatting
 
