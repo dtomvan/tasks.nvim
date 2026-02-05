@@ -40,7 +40,7 @@ function M.get_huid()
 end
 
 function M.get_database()
-    local root_dir = vim.fs.root(0, ".git")
+    local root_dir = vim.fs.root(vim.uv.cwd(), ".git")
     if root_dir then
         return vim.fs.joinpath(root_dir, "tasks")
     end
