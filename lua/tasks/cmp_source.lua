@@ -1,5 +1,6 @@
 -- templated from hrsh7th/cmp-buffer
 
+local filters = require("tasks.filters")
 local utils = require("tasks.utils")
 
 local defaults = {}
@@ -29,9 +30,7 @@ source.complete = function(self, params, callback)
     local input = string.sub(params.context.cursor_before_line, params.offset)
     local items = {}
     -- TODO: factor out list_huids
-    local tasks = utils.list_tasks(function(t)
-        return t.state ~= "CLOSED"
-    end)
+    local tasks = utils.list_tasks(filters.is_open)
     for _, task in ipairs(tasks) do
         if vim.startswith(task.huid, input) and task.huid ~= input then
             table.insert(items, {

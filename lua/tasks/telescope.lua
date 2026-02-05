@@ -3,6 +3,7 @@ if not ok then
     return
 end
 
+local filters = require "tasks.filters"
 local utils = require "tasks.utils"
 
 local conf = require("telescope.config").values
@@ -18,10 +19,7 @@ function M.picker(opts)
         .new(opts, {
             prompt_title = "tasks",
             finder = finders.new_table {
-                results = utils.list_tasks(function(task)
-                    -- allow for more states than open and closed, but only make closed the one that hides
-                    return task.state ~= "CLOSED"
-                end),
+                results = utils.list_tasks(filters.is_open),
                 entry_maker = function(entry)
                     return {
                         value = entry,
