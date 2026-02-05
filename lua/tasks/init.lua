@@ -16,7 +16,7 @@ end
 function M.go_to()
     local line = utils.get_line()
     local huid = string.match(line, "TASK%((.*)%)")
-    local ok, task_file = pcall(utils.get_task_by_huid, huid, false)
+    local ok, task_file = pcall(utils.get_task_path_by_huid, huid, false)
     if not ok then
         return vim.notify(("Tasks: no task with HUID %s"):format(huid), vim.log.levels.ERROR)
     end
