@@ -4,7 +4,8 @@
 
 ## Usage
 
-### Bare nvim package management
+<details>
+<summary>Built-in nvim package management</summary>
 OPTIONAL: install telescope and nvim-cmp for a better experience
 
 ```lua
@@ -23,8 +24,11 @@ vim.keymap.set("n", "<leader>to", "<cmd>Telescope tasks<cr>")
 -- OPTIONAL: cmp source
 require'cmp'.setup { sources = { { name = 'tasks' } } }
 ```
+</details>
 
-### With Lazy.nvim
+<details>
+<summary>With Lazy.nvim</summary>
+
 ```lua
 return {
     {
@@ -46,7 +50,10 @@ return {
 }
 ```
 
-### With nixvim
+</details>
+
+<details>
+<summary>With nixvim</summary>
 Make sure to pass `inputs` via `specialArgs` in your home-manager
 configuration, or otherwise (e.g. flake-parts) find a way to import the module
 in your nixvim configuration.
@@ -75,3 +82,5 @@ in your nixvim configuration.
   };
 }
 ```
+
+</details>
