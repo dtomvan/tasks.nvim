@@ -41,3 +41,30 @@ return {
     { "hrsh7th/nvim-cmp", opts = { sources = { { name = "tasks" } }, dependencies = { "dtomvan/tasks.nvim" } } },
 }
 ```
+
+### With nixvim
+Make sure to pass `inputs` via `specialArgs` in your home-manager
+configuration, or otherwise (e.g. flake-parts) find a way to import the module
+in your nixvim configuration.
+
+```nix
+# flake.nix
+{
+  inputs = {
+    inputs.tasks.url = "github:dtomvan/tasks.nvim";
+  };
+}
+
+# home.nix
+{ inputs, ... }:
+{
+  programs.nixvim = {
+    imports = [ inputs.tasks.modules.nixvim ];
+    plugins.tasks = {
+      enable = true;
+      withTelescope = true;
+      withCmp = true;
+    };
+  };
+}
+```
