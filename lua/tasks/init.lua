@@ -46,12 +46,29 @@ function M.list()
     vim.print(res)
 end
 
+function M.qf_list()
+    local cwd = vim.uv.cwd()
+    local tasks = utils.list_tasks(filters.is_open)
+    local res = {}
+    for _, task in ipairs(tasks) do
+        table.insert(res, {
+            filename = vim.fs.relpath(cwd, task.task_file),
+            lnum = 1,
+            col = 1,
+            text = "# " .. task.title,
+        })
+    end
+    vim.fn.setqflist({}, "r", { title = ("Open tasks in %s"):format(cwd), items = res })
+    vim.cmd.cope()
+end
+
 local function add_commands()
     for name, fn in pairs {
         TasksNew = M.new,
         TasksGoto = M.go_to,
         TasksCreateFromTODO = M.create_from_todo,
         TasksList = M.list,
+        TasksQfList = M.qf_list,
     } do
         a.nvim_create_user_command(name, fn, { force = true })
     end
