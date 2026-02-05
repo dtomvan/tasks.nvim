@@ -47,7 +47,7 @@ function M.create_from_todo()
                 vim.fs.joinpath("..", "..", vim.fs.relpath(root_dir, current_path)),
                 "",
             })
-        end
+        end,
     }
 end
 

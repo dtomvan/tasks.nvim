@@ -40,15 +40,18 @@ function Task.list(filter)
         local task_dir = vim.fs.joinpath(database, x)
         local task_file = vim.fs.joinpath(task_dir, "TASK.md")
 
-        local ok, task = pcall(Task.validate, Task.new({
-            huid = x,
-            task_dir = task_dir,
-            task_file = task_file,
-            -- "" is invalid, so error, but atleast type checking passes
-            title = utils.get_task_title(task_file) or "",
-            priority = tonumber(utils.get_task_priority(task_file)) or 50,
-            state = utils.get_task_state(task_file),
-        }))
+        local ok, task = pcall(
+            Task.validate,
+            Task.new({
+                huid = x,
+                task_dir = task_dir,
+                task_file = task_file,
+                -- "" is invalid, so error, but atleast type checking passes
+                title = utils.get_task_title(task_file) or "",
+                priority = tonumber(utils.get_task_priority(task_file)) or 50,
+                state = utils.get_task_state(task_file),
+            })
+        )
 
         if not ok then
             vim.notify(("Tasks: invalid task %s: %s"):format(x, task), vim.log.levels.WARNING)
@@ -99,7 +102,9 @@ function Task.create(opts)
             local line_count = vim.api.nvim_buf_line_count(0)
             a.nvim_win_set_cursor(0, { line_count, 0 })
             vim.api.nvim_feedkeys("i", "nt", false)
-            if opts.callback then opts.callback(task_file) end
+            if opts.callback then
+                opts.callback(task_file)
+            end
         end)
     end
 
