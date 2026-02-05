@@ -30,6 +30,7 @@
             vim.keymap.set("n", "<leader>tg", require'tasks'.go_to)
             vim.keymap.set("n", "<leader>tn", require'tasks'.create_from_todo)
             vim.keymap.set("n", "<leader>tc", require'tasks'.new)
+            vim.keymap.set("n", "<leader>tl", require'tasks'.list)
             vim.keymap.set("n", "<leader>to", "<cmd>Telescope tasks<cr>")
           '';
         wrapperArgs = [

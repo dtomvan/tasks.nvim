@@ -195,4 +195,9 @@ function M.list_tasks(filter)
     return res
 end
 
+function M.pretty_print_task(task)
+    M.validate_task(task)
+    return ("<%03d> [%s] %s"):format(task.priority, task.huid, task.title)
+end
+
 return M

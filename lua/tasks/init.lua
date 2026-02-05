@@ -1,3 +1,4 @@
+local filters = require "tasks.filters"
 local utils = require "tasks.utils"
 
 local a = vim.api
@@ -36,11 +37,21 @@ function M.create_from_todo()
     utils.create_task({ title = suffix })
 end
 
+function M.list()
+    local tasks = utils.list_tasks(filters.is_open)
+    local res = ""
+    for _, task in ipairs(tasks) do
+        res = res .. utils.pretty_print_task(task) .. "\n"
+    end
+    vim.print(res)
+end
+
 local function add_commands()
     for name, fn in pairs {
         TasksNew = M.new,
         TasksGoto = M.go_to,
         TasksCreateFromTODO = M.create_from_todo,
+        TasksList = M.list,
     } do
         a.nvim_create_user_command(name, fn, { force = true })
     end
