@@ -1,6 +1,6 @@
 # nvim-cmp source
 
-- STATE: OPEN
+- STATE: CLOSED
 - PRIORITY: 50
 
 Type `TASK(` and get autocompleted. Simple as that. Should be doable right?
