@@ -23,7 +23,7 @@ function M.picker(opts)
                 entry_maker = function(entry)
                     return {
                         value = entry,
-                        display = M.pretty_print_task(entry),
+                        display = utils.pretty_print_task(entry),
                         ordinal = ("%03d %s %s"):format(entry.priority, entry.huid, entry.title),
                         path = entry.task_file,
                         lnum = 1, -- where the title goes, for quickfixlist purposes
