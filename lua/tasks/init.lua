@@ -34,7 +34,19 @@ function M.create_from_todo()
 
     local huid = utils.get_huid()
     utils.set_line(prefix .. ("TASK(%s): "):format(huid) .. suffix)
-    utils.create_task({ title = suffix })
+
+    local current_path = vim.fn.expand("%:p")
+    utils.create_task({
+        title = suffix,
+        huid = huid,
+        callback = function(_)
+            local root_dir = utils.get_root_dir()
+            a.nvim_buf_set_lines(0, -2, -1, false, {
+                vim.fs.joinpath("..", "..", vim.fs.relpath(root_dir, current_path)),
+                "",
+            })
+        end
+    })
 end
 
 function M.list()

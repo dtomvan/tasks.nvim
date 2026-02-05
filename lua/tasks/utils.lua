@@ -43,8 +43,12 @@ function M.get_huid()
     return os.date("%Y%m%d-%H%M%S", M.get_utc())
 end
 
+function M.get_root_dir()
+    return vim.fs.root(vim.uv.cwd(), ".git")
+end
+
 function M.get_database()
-    local root_dir = vim.fs.root(vim.uv.cwd(), ".git")
+    local root_dir = M.get_root_dir()
     if root_dir then
         return vim.fs.joinpath(root_dir, "tasks")
     end
@@ -103,6 +107,7 @@ M.get_task_state = M.nil_if_error(M.get_task_field("STATE"))
 function M.create_task(opts)
     vim.validate("opts.title", opts.title, "string")
     vim.validate("opts.huid", opts.huid, { "nil", "string" })
+    vim.validate("opts.callback", opts.callback, { "nil", "function" })
 
     local task_file = M.get_task_path_by_huid(opts.huid or M.get_huid(), true)
     vim.cmd.split(task_file)
@@ -118,6 +123,7 @@ function M.create_task(opts)
         local line_count = vim.api.nvim_buf_line_count(0)
         a.nvim_win_set_cursor(0, { line_count, 0 })
         vim.api.nvim_feedkeys("i", "nt", false)
+        if opts.callback then opts.callback(task_file) end
     end)
 end
 
