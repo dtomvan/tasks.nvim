@@ -39,8 +39,9 @@ function M.get_utc(localtime)
     return (localtime or os.time()) - offset
 end
 
+---@return string
 function M.get_huid()
-    return os.date("%Y%m%d-%H%M%S", M.get_utc())
+    return tostring(os.date("%Y%m%d-%H%M%S", M.get_utc()))
 end
 
 function M.get_root_dir()
@@ -56,7 +57,7 @@ end
 
 function M.get_task_path_by_huid(huid, create)
     vim.validate("huid", huid, "string")
-    vim.validate("create", create, { "nil", "boolean" })
+    vim.validate("create", create, { "nil", "string" })
 
     local db = M.get_database()
     if not db then
@@ -65,16 +66,18 @@ function M.get_task_path_by_huid(huid, create)
 
     local task_path = vim.fs.joinpath(db, huid)
     local task_md_path = vim.fs.joinpath(task_path, "TASK.md")
-    if not vim.uv.fs_stat(task_md_path) and (create or false) then
+    if not vim.uv.fs_stat(task_md_path) and type(create) == "string" then
         vim.fn.mkdir(task_path, "p")
         local handle = vim.uv.fs_open(task_md_path, "w", tonumber("644", 8))
-        vim.uv.fs_write(handle, "")
+        vim.uv.fs_write(handle, create)
         vim.uv.fs_close(handle)
     end
 
     return task_md_path
 end
 
+---@param absolute_path string
+---@return string?
 function M.get_task_title(absolute_path)
     if type(absolute_path) ~= "string" then
         return
@@ -103,107 +106,5 @@ end
 
 M.get_task_priority = M.nil_if_error(M.get_task_field("PRIORITY"))
 M.get_task_state = M.nil_if_error(M.get_task_field("STATE"))
-
-function M.create_task(opts)
-    vim.validate("opts.title", opts.title, "string")
-    vim.validate("opts.huid", opts.huid, { "nil", "string" })
-    vim.validate("opts.callback", opts.callback, { "nil", "function" })
-
-    local task_file = M.get_task_path_by_huid(opts.huid or M.get_huid(), true)
-    vim.cmd.split(task_file)
-    vim.schedule(function()
-        a.nvim_buf_set_lines(0, 0, -1, false, {
-            ("# %s"):format(opts.title),
-            "",
-            "- STATE: OPEN",
-            "- PRIORITY: 50",
-            "",
-            "",
-        })
-        local line_count = vim.api.nvim_buf_line_count(0)
-        a.nvim_win_set_cursor(0, { line_count, 0 })
-        vim.api.nvim_feedkeys("i", "nt", false)
-        if opts.callback then opts.callback(task_file) end
-    end)
-end
-
-function M.validate_task(task)
-    vim.validate("task", task, "table")
-    vim.validate("task.huid", task.huid, function(v)
-        if type(v) ~= "string" then
-            return false
-        end
-        return string.match(v, "^%d%d%d%d%d%d%d%d%-%d%d%d%d%d%d$") ~= nil
-    end, "valid HUID")
-    vim.validate("task.task_dir", task.task_dir, function(v)
-        return vim.fn.isabsolutepath(v) == 1 and vim.fn.isdirectory(v) == 1
-    end, "absolute path to existing directory")
-    vim.validate("task.task_file", task.task_file, function(v)
-        return vim.fn.isabsolutepath(v) == 1 and vim.uv.fs_stat(v) ~= nil and vim.fs.basename(v) == "TASK.md"
-    end, "absolute path to existing file with name TASK.md")
-    vim.validate("task.title", task.title, function(v)
-        return type(v) == "string" and string.len(v) > 0
-    end, "string with length > 0")
-    vim.validate("task.priority", task.priority, function(v)
-        if type(v) ~= "number" then
-            return false
-        end
-        return v >= 0 and v <= 100
-    end, "number between 0 and 100")
-    vim.validate("task.state", task.state, function(v)
-        if type(v) ~= "string" then
-            return false
-        end
-        return string.match(v, "^%u+$") ~= nil
-    end, "single word, all caps")
-
-    return task
-end
-
-function M.list_tasks(filter)
-    vim.validate("filter", filter, { "nil", "function" })
-
-    local database = M.get_database()
-    if not database then
-        return vim.notify("Tasks: no database found", vim.log.levels.ERROR)
-    end
-
-    local iter = vim.iter(vim.fs.dir(database)):map(function(x, _)
-        local task_dir = vim.fs.joinpath(database, x)
-        local task_file = vim.fs.joinpath(task_dir, "TASK.md")
-
-        local ok, task = pcall(M.validate_task, {
-            huid = x,
-            task_dir = task_dir,
-            task_file = task_file,
-            title = M.get_task_title(task_file),
-            priority = tonumber(M.get_task_priority(task_file) or 50),
-            state = M.get_task_state(task_file),
-        })
-
-        if not ok then
-            vim.notify(("Tasks: invalid task %s: %s"):format(x, task), vim.log.levels.WARNING)
-        end
-
-        if ok then
-            return task
-        end
-    end)
-
-    if type(filter) == "function" then
-        iter:filter(filter)
-    end
-
-    local res = iter:totable()
-    table.sort(res, function(x, y)
-        return x.priority > y.priority
-    end)
-    return res
-end
-
-function M.pretty_print_task(task)
-    M.validate_task(task)
-    return ("<%03d> [%s] %s"):format(task.priority, task.huid, task.title)
-end
 
 return M

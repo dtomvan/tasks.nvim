@@ -1,13 +1,15 @@
 local filters = require "tasks.filters"
 local utils = require "tasks.utils"
 
+local Task = require "tasks.task"
+
 local a = vim.api
 
 local M = {}
 
 function M.new()
     vim.ui.input({ prompt = "Enter title for task: ", default = "TODO" }, function(title)
-        utils.create_task {
+        Task.create {
             title = title,
         }
     end)
@@ -16,7 +18,7 @@ end
 function M.go_to()
     local line = utils.get_line()
     local huid = string.match(line, "TASK%((.*)%)")
-    local ok, task_file = pcall(utils.get_task_path_by_huid, huid, false)
+    local ok, task_file = pcall(utils.get_task_path_by_huid, huid, nil)
     if not ok then
         return vim.notify(("Tasks: no task with HUID %s"):format(huid), vim.log.levels.ERROR)
     end
@@ -36,7 +38,7 @@ function M.create_from_todo()
     utils.set_line(prefix .. ("TASK(%s): "):format(huid) .. suffix)
 
     local current_path = vim.fn.expand("%:p")
-    utils.create_task({
+    Task.create {
         title = suffix,
         huid = huid,
         callback = function(_)
@@ -46,21 +48,21 @@ function M.create_from_todo()
                 "",
             })
         end
-    })
+    }
 end
 
 function M.list()
-    local tasks = utils.list_tasks(filters.is_open)
+    local tasks = Task.list(filters.is_open)
     local res = ""
     for _, task in ipairs(tasks) do
-        res = res .. utils.pretty_print_task(task) .. "\n"
+        res = res .. Task.pretty_print(task) .. "\n"
     end
     vim.print(res)
 end
 
 function M.qf_list()
     local cwd = vim.uv.cwd()
-    local tasks = utils.list_tasks(filters.is_open)
+    local tasks = Task.list(filters.is_open)
     local res = {}
     for _, task in ipairs(tasks) do
         table.insert(res, {

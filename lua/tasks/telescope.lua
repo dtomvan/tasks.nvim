@@ -6,6 +6,8 @@ end
 local filters = require "tasks.filters"
 local utils = require "tasks.utils"
 
+local Task = require "tasks.task"
+
 local conf = require("telescope.config").values
 local finders = require "telescope.finders"
 local pickers = require "telescope.pickers"
@@ -19,11 +21,12 @@ function M.picker(opts)
         .new(opts, {
             prompt_title = "tasks",
             finder = finders.new_table {
-                results = utils.list_tasks(filters.is_open),
+                results = Task.list(filters.is_open),
+                ---@param entry tasks.Task
                 entry_maker = function(entry)
                     return {
                         value = entry,
-                        display = utils.pretty_print_task(entry),
+                        display = Task.pretty_print(entry),
                         ordinal = ("%03d %s %s"):format(entry.priority, entry.huid, entry.title),
                         path = entry.task_file,
                         lnum = 1, -- where the title goes, for quickfixlist purposes
