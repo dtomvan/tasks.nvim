@@ -1,5 +1,7 @@
 # Contributing
 
+When contributing, you have to adhere to the [MIT license](https://opensource.org/license/mit) as well as the [DCO](https://developercertificate.org/).
+
 ## Prerequisites
 
 Just [Nix](https://nixos.org/download). [Neovim](https://neovim.org) recommended.
