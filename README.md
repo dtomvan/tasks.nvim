@@ -80,6 +80,11 @@ Make sure to pass `inputs` via `specialArgs` in your home-manager
 configuration, or otherwise (e.g. flake-parts) find a way to import the module
 in your nixvim configuration.
 
+For a full template for standalone nixvim, run:
+```bash
+nix flake init -t github:dtomvan/tasks.nvim
+```
+
 ```nix
 # flake.nix
 {
