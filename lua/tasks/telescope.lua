@@ -13,6 +13,28 @@ local finders = require "telescope.finders"
 local pickers = require "telescope.pickers"
 local previewers = require "telescope.previewers"
 
+local entry_display = require "telescope.pickers.entry_display"
+
+local displayer = entry_display.create {
+    separator = "|",
+    items = {
+        { width = 3 },
+        { width = 15 },
+        { width = 10 },
+        { remaining = true },
+    },
+}
+
+local function format_priority(p)
+    local hi = "DiagnosticWarn"
+    if p < 33 then
+        hi = "DiagnosticOk"
+    elseif p > 66 then
+        hi = "DiagnosticError"
+    end
+    return { ("%03d"):format(p), hi }
+end
+
 local M = {}
 
 local function make_picker(title, fn)
@@ -27,7 +49,14 @@ local function make_picker(title, fn)
                     entry_maker = function(entry)
                         return {
                             value = entry,
-                            display = Task.pretty_print(entry),
+                            display = function(e)
+                                return displayer {
+                                    format_priority(e.value.priority),
+                                    { e.value.huid, "Comment" },
+                                    { table.concat(e.value.tags, ","), "DiagnosticInfo" },
+                                    e.value.title,
+                                }
+                            end,
                             ordinal = ("%03d %s %s %s"):format(
                                 entry.priority,
                                 entry.huid,
