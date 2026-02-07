@@ -116,7 +116,7 @@ function Task.create(opts)
     vim.validate("opts.callback", opts.callback, { "nil", "function" })
 
     local huid = opts.huid or utils.get_huid()
-    local template = Task.make_template(opts.title)
+    local template = table.concat(Task.make_template(opts.title), "\n")
     local task_file = utils.get_task_path_by_huid(huid, template)
 
     if opts.open ~= false then
