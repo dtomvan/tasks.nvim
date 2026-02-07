@@ -9,6 +9,7 @@ local utils = require("tasks.utils")
 ---@field title string
 ---@field priority number 0-100
 ---@field state string Currently one of OPEN, CLOSED
+---@field tags string[]
 
 local Task = {}
 
@@ -21,6 +22,7 @@ function Task.make_template(title)
         "",
         ("- STATE: %s"):format(Task.DEFAULT_STATE),
         ("- PRIORITY: %d"):format(Task.DEFAULT_PRIORITY),
+        "- TAGS: ",
         "",
         "",
     }
@@ -38,6 +40,8 @@ function Task.by_huid(database, huid)
     local task_dir = vim.fs.joinpath(database, huid)
     local task_file = vim.fs.joinpath(task_dir, "TASK.md")
 
+    local tags = utils.get_task_tags(task_file)
+
     local ok, task = pcall(
         Task.validate,
         Task.new({
@@ -48,6 +52,7 @@ function Task.by_huid(database, huid)
             title = utils.get_task_title(task_file) or "",
             priority = tonumber(utils.get_task_priority(task_file)) or 50,
             state = utils.get_task_state(task_file),
+            tags = tags and vim.split(tags, " ", { trimempty = true }) or {},
         })
     )
 
@@ -60,7 +65,7 @@ function Task.by_huid(database, huid)
     end
 end
 
----@return tasks.Task
+---@return tasks.Task?
 function Task.from_current_file()
     local current_huid = vim.fs.basename(vim.fn.expand("%:h:p"))
     local ok, task = pcall(Task.by_huid, nil, current_huid)
@@ -138,6 +143,7 @@ function Task.create(opts)
         title = opts.title,
         priority = Task.DEFAULT_PRIORITY,
         state = Task.DEFAULT_STATE,
+        tags = {},
     }
 end
 
@@ -171,6 +177,14 @@ function Task:validate()
         end
         return string.match(v, "^%u+$") ~= nil
     end, "single word, all caps")
+    vim.validate("task.tags", self.tags, function(tags)
+        if not vim.islist(tags) then
+            return false
+        end
+        return vim.iter(tags):all(function(v)
+            return type(v) == "string" and not string.match(v, " ")
+        end)
+    end, "list of strings, no spaces")
 
     return self
 end
@@ -180,7 +194,8 @@ end
 ---@return string
 function Task:pretty_print()
     self:validate()
-    return ("<%03d> [%s] %s"):format(self.priority, self.huid, self.title)
+    local maybe_tags = self.tags[1] ~= nil and (" {%s}"):format(table.concat(self.tags, ",")) or ""
+    return ("<%03d> [%s]%s %s"):format(self.priority, self.huid, maybe_tags, self.title)
 end
 
 ---@class tasks.Backlink

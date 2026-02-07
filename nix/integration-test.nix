@@ -2,7 +2,7 @@
 # - Entries are sorted by priority
 # - Entries are found in tasks directory (in a git repo)
 # - qflist lists only open tasks
-# - TasksList formats the tasks like this: <{PRIORITY:03}> [{huid}] {title}
+# - TasksList formats the tasks like this: <{PRIORITY:03}> [{huid}] {{tags}} {title}
 # - The telescope export doesn't error out (we can't really integration test
 #   telescope any further using headless neovim)
 {
@@ -20,9 +20,10 @@
           title,
           priority,
           state,
+          tags ? [ ],
         }:
         lib.nameValuePair huid (
-          pkgs.writeTextDir "TASK.md" "# ${title}\n\n- STATE: ${state}\n- PRIORITY: ${priority}\n"
+          pkgs.writeTextDir "TASK.md" "# ${title}\n\n- STATE: ${state}\n- PRIORITY: ${priority}\n- TAGS: ${lib.concatStringsSep " " tags}"
         );
 
       fakeTasks = pkgs.linkFarm "fake-tasks" (
@@ -33,12 +34,20 @@
               title = "Not so important task";
               state = "CLOSED";
               priority = "30";
+              tags = [
+                "later"
+                "neovim"
+              ];
             }
             {
               huid = "20260205-123456";
               title = "Very Important Task";
               state = "OPEN";
               priority = "100";
+              tags = [
+                "now"
+                "telescope"
+              ];
             }
             {
               huid = "20260201-123456";
@@ -71,6 +80,7 @@
                 priority = 100,
                 task_dir = cwd .. "/tasks/20260205-123456",
                 task_file = cwd .. "/tasks/20260205-123456/TASK.md",
+                tags = { "now", "telescope" },
               },
               {
                 huid = "20260201-123456",
@@ -79,6 +89,7 @@
                 priority = 50,
                 task_dir = cwd .. "/tasks/20260201-123456",
                 task_file = cwd .. "/tasks/20260201-123456/TASK.md",
+                tags = { },
               },
               {
                 huid = "20260204-123434",
@@ -87,6 +98,7 @@
                 priority = 30,
                 task_dir = cwd .. "/tasks/20260204-123434",
                 task_file = cwd .. "/tasks/20260204-123434/TASK.md",
+                tags = { "later", "neovim" },
               },
             }
 
@@ -119,8 +131,8 @@
 
             print("testing qflist...")
             require("tasks").qf_list()
-            assert(vim.fn.getqflist()[1].text == "# Very Important Task")
-            assert(vim.fn.getqflist()[2].text == "# Another open task")
+            assert(vim.fn.getqflist()[1].text == "<100> [20260205-123456] {now,telescope} Very Important Task")
+            assert(vim.fn.getqflist()[2].text == "<050> [20260201-123456] Another open task")
           '';
     in
     {
@@ -156,7 +168,7 @@
             }
 
             output="$(nvim --headless +TasksList +qa! 2>&1)"
-            expected=$'<100> [20260205-123456] Very Important Task\r\n<050> [20260201-123456] Another open task\r'
+            expected=$'<100> [20260205-123456] {now,telescope} Very Important Task\r\n<050> [20260201-123456] Another open task\r'
             assert_eq
 
             output="$(nvim --headless +'e tasks/20260201-123456/TASK.md' +TasksBacklinks +sleep +qa! 2>&1)"

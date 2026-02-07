@@ -1,4 +1,5 @@
 # Implement tags
 
-- STATE: OPEN
+- STATE: CLOSED
 - PRIORITY: 50
+- TAGS: tags format

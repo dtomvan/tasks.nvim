@@ -69,7 +69,7 @@ function M.qf_list()
             filename = vim.fs.relpath(cwd, task.task_file),
             lnum = 1,
             col = 1,
-            text = "# " .. task.title,
+            text = Task.pretty_print(task),
         })
     end
     vim.fn.setqflist({}, "r", { title = ("Open tasks in %s"):format(cwd), items = res })

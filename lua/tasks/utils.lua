@@ -106,6 +106,7 @@ end
 
 M.get_task_priority = M.nil_if_error(M.get_task_field("PRIORITY"))
 M.get_task_state = M.nil_if_error(M.get_task_field("STATE"))
+M.get_task_tags = M.nil_if_error(M.get_task_field("TAGS"))
 
 function M.spawn_output(prog, args, cb)
     local stdout = vim.uv.new_pipe()

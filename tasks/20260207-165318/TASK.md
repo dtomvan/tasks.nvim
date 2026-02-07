@@ -2,6 +2,7 @@
 
 - STATE: OPEN
 - PRIORITY: 50
+- TAGS: ux
 
 Currently, we have multiple commands:
 - TasksNew
