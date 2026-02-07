@@ -159,11 +159,11 @@
             expected=$'<100> [20260205-123456] Very Important Task\r\n<050> [20260201-123456] Another open task\r'
             assert_eq
 
-            output="$(nvim --headless +'e tasks/20260201-123456/TASK.md' +TasksBacklinks +qa! 2>&1)"
+            output="$(nvim --headless +'e tasks/20260201-123456/TASK.md' +TasksBacklinks +sleep +qa! 2>&1)"
             expected=$'README:1:1: foo bar\r'
             assert_eq
 
-            output="$(nvim --headless +'e tasks/20260204-123434/TASK.md' +TasksBacklinks +qa! 2>&1)"
+            output="$(nvim --headless +'e tasks/20260204-123434/TASK.md' +TasksBacklinks +sleep +qa! 2>&1)"
             expected=$'README:2:1: baz\r'
             assert_eq
 
