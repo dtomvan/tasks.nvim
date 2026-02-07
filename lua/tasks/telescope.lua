@@ -28,7 +28,12 @@ local function make_picker(title, fn)
                         return {
                             value = entry,
                             display = Task.pretty_print(entry),
-                            ordinal = ("%03d %s %s"):format(entry.priority, entry.huid, entry.title),
+                            ordinal = ("%03d %s %s %s"):format(
+                                entry.priority,
+                                entry.huid,
+                                table.concat(entry.tags, " "),
+                                entry.title
+                            ),
                             path = entry.task_file,
                             lnum = 1, -- where the title goes, for quickfixlist purposes
                             text = "# " .. entry.title,
