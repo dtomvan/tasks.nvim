@@ -33,6 +33,7 @@
             vim.keymap.set("n", "<leader>tl", require'tasks'.list)
             vim.keymap.set("n", "<leader>tq", require'tasks'.qf_list)
             vim.keymap.set("n", "<leader>to", "<cmd>Telescope tasks<cr>")
+            vim.keymap.set("n", "<leader>tb", "<cmd>Telescope tasks backlinks<cr>")
           '';
         wrapperArgs = [
           "--set"
