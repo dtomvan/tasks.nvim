@@ -2,7 +2,26 @@
 
 @Tsoding's take on in-tree issue reporting/task management.
 
+Inspired by this Tsoding Daily video: https://youtu.be/QH6KOEVnSZA
+
+Note that the MVP (matching Tsoding's functionality) was implemented in the
+initial commit ([41ed9234428c1ce5753d5a2f981d7285babd8554](https://github.com/dtomvan/tasks.nvim/commit/41ed9234428c1ce5753d5a2f981d7285babd8554)) and
+this codebase got more and more complex as I went down the rabbit hole.
+
+## Features
+- Create tasks from template
+- Create tasks from `TODO`s in the codebase
+- List (open) tasks
+- Open tasks in a [quickfix](https://neovim.io/doc/user/quickfix.html)list.
+- Jump to mentions of tasks
+- Find backlinks (yes, also between tasks)
+- [Telescope](https://github.com/nvim-telescope/telescope.nvim) integration
+- [nvim-cmp](https://github.com/hrsh7th/nvim-cmp) integration
+
 ## Usage
+
+Required for backlink search: use a Git repository. Currently it's hardcoded to
+use `git grep` to search through all tracked files in the codebase.
 
 <details>
 <summary>Built-in nvim package management</summary>
