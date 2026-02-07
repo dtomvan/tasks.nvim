@@ -101,18 +101,38 @@ function M.backlinks()
     end
 end
 
+M.COMMANDS = {
+    new = M.new,
+    ["goto"] = M.go_to,
+    ["create-from-todo"] = M.create_from_todo,
+    list = M.list,
+    ["qf-list"] = M.qf_list,
+    backlinks = M.backlinks,
+    ["qf-backlinks"] = M.qf_backlinks,
+}
+
+M.COMMAND_LIST = {}
+
+for n, _ in pairs(M.COMMANDS) do
+    table.insert(M.COMMAND_LIST, n)
+end
+
+function M.interactive(e)
+    M.COMMANDS[e.fargs[1]](unpack(vim.list_slice(e.fargs, 2)))
+end
+
 local function add_commands()
-    for name, fn in pairs {
-        TasksNew = M.new,
-        TasksGoto = M.go_to,
-        TasksCreateFromTODO = M.create_from_todo,
-        TasksList = M.list,
-        TasksQfList = M.qf_list,
-        TasksBacklinks = M.backlinks,
-        TasksQfBacklinks = M.qf_backlinks,
-    } do
-        a.nvim_create_user_command(name, fn, { force = true })
-    end
+    a.nvim_create_user_command("Tasks", M.interactive, {
+        nargs = "+",
+        force = true,
+        complete = function(lead)
+            return vim.iter(M.COMMAND_LIST)
+                :filter(function(c)
+                    return vim.startswith(c, lead)
+                end)
+                :totable()
+        end,
+    })
 end
 
 function M.setup(opts)

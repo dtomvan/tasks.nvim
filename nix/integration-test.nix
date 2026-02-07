@@ -2,7 +2,7 @@
 # - Entries are sorted by priority
 # - Entries are found in tasks directory (in a git repo)
 # - qflist lists only open tasks
-# - TasksList formats the tasks like this: <{PRIORITY:03}> [{huid}] {{tags}} {title}
+# - `Tasks list` formats the tasks like this: <{PRIORITY:03}> [{huid}] {{tags}} {title}
 # - The telescope export doesn't error out (we can't really integration test
 #   telescope any further using headless neovim)
 {
@@ -167,15 +167,15 @@
               fi
             }
 
-            output="$(nvim --headless +TasksList +qa! 2>&1)"
+            output="$(nvim --headless +'Tasks list' +qa! 2>&1)"
             expected=$'<100> [20260205-123456] {now,telescope} Very Important Task\r\n<050> [20260201-123456] Another open task\r'
             assert_eq
 
-            output="$(nvim --headless +'e tasks/20260201-123456/TASK.md' +TasksBacklinks +sleep +qa! 2>&1)"
+            output="$(nvim --headless +'e tasks/20260201-123456/TASK.md' +'Tasks backlinks' +sleep +qa! 2>&1)"
             expected=$'README:1:1: foo bar\r'
             assert_eq
 
-            output="$(nvim --headless +'e tasks/20260204-123434/TASK.md' +TasksBacklinks +sleep +qa! 2>&1)"
+            output="$(nvim --headless +'e tasks/20260204-123434/TASK.md' +'Tasks backlinks' +sleep +qa! 2>&1)"
             expected=$'README:2:1: baz\r'
             assert_eq
 

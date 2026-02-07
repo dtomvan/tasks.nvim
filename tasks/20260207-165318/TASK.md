@@ -1,6 +1,6 @@
 # Single command
 
-- STATE: OPEN
+- STATE: CLOSED
 - PRIORITY: 50
 - TAGS: ux
 

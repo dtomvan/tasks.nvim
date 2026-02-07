@@ -14,7 +14,7 @@
 
       cfg = config.plugins.tasks;
       settingsModule.options = {
-        add_commands = lib.mkEnableOption "Neovim user commands for tasks.nvim (e.g. TasksNew, TasksGoto)";
+        add_commands = lib.mkEnableOption "`Tasks` command for tasks.nvim";
       };
     in
     {
