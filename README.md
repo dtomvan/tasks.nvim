@@ -15,11 +15,13 @@ vim.keymap.set("n", "<leader>tn", require'tasks'.create_from_todo)
 vim.keymap.set("n", "<leader>tc", require'tasks'.new)
 vim.keymap.set("n", "<leader>tl", require'tasks'.list)
 vim.keymap.set("n", "<leader>tq", require'tasks'.qf_list)
+vim.keymap.set("n", "<leader>tb", require'tasks'.qf_backlinks)
 
 -- OPTIONAL: telescope finder with `:Telescope tasks`
 require'telescope'.setup { extensions = { tasks = {} } }
 require('telescope').load_extension('tasks')
 vim.keymap.set("n", "<leader>to", "<cmd>Telescope tasks<cr>")
+vim.keymap.set("n", "<leader>tb", "<cmd>Telescope tasks backlinks<cr>")
 
 -- OPTIONAL: cmp source
 require'cmp'.setup { sources = { { name = 'tasks' } } }
@@ -43,7 +45,8 @@ return {
             { "<leader>tc", "<cmd>TasksNew<cr>", desc = "Create task from scratch" },
             { "<leader>tl", "<cmd>TasksList<cr>", desc = "List open tasks" },
             { "<leader>tq", "<cmd>TasksQfList<cr>", desc = "Set quickfix list to open tasks" },
-            { "<leader>to", function() require'tasks.telescope'.picker() end, desc = "Use telescope to search through open tasks" },
+            { "<leader>to", function() require'tasks.telescope'.open_tasks() end, desc = "Use telescope to search through open tasks" },
+            { "<leader>tb", function() require'tasks.telescope'.backlinks() end, desc = "Use telescope to search through open tasks" },
         },
     },
     { "hrsh7th/nvim-cmp", opts = { sources = { { name = "tasks" } }, dependencies = { "dtomvan/tasks.nvim" } } },
