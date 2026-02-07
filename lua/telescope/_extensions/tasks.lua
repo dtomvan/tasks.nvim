@@ -4,7 +4,10 @@ return require("telescope").register_extension {
         require "tasks".setup {}
     end,
     exports = {
-        tasks = require("tasks.telescope").picker,
+        tasks = require("tasks.telescope").open_tasks,
+        open = require("tasks.telescope").open_tasks,
+        closed = require("tasks.telescope").closed_tasks,
+        all = require("tasks.telescope").all_tasks,
         backlinks = require("tasks.telescope").backlinks,
     },
 }

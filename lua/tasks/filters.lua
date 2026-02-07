@@ -6,4 +6,8 @@ function M.is_open(t)
     return t.state ~= "CLOSED"
 end
 
+function M.is_closed(t)
+    return not M.is_open(t)
+end
+
 return M
