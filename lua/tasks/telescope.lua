@@ -40,4 +40,36 @@ function M.picker(opts)
         :find()
 end
 
+function M.backlinks(opts)
+    local task = Task.from_current_file()
+    if task then
+        Task.find_backlinks(task, function(backlinks)
+            vim.schedule(function()
+                pickers
+                    .new(opts, {
+                        prompt_title = ("Backlinks to %s"):format(task.huid),
+                        finder = finders.new_table {
+                            results = backlinks,
+                            entry_maker = function(entry)
+                                ---@cast entry tasks.Backlink
+                                local display = utils.pretty_print_backlink(entry)
+                                return {
+                                    value = entry,
+                                    display = display,
+                                    ordinal = display,
+                                    path = entry.filename,
+                                    lnum = entry.lnum,
+                                    text = entry.text,
+                                }
+                            end,
+                        },
+                        sorter = conf.generic_sorter(opts),
+                        previewer = previewers.cat:new(),
+                    })
+                    :find()
+            end)
+        end)
+    end
+end
+
 return M

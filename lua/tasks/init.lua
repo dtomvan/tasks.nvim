@@ -76,6 +76,31 @@ function M.qf_list()
     vim.cmd.cope()
 end
 
+function M.qf_backlinks()
+    local task = Task.from_current_file()
+    if task then
+        Task.find_backlinks(task, function(backlinks)
+            vim.schedule(function()
+                vim.fn.setqflist({}, "r", { title = ("Backlinks to"):format(task.huid), items = backlinks })
+                vim.cmd.cope()
+            end)
+        end)
+    end
+end
+
+function M.backlinks()
+    local task = Task.from_current_file()
+    if task then
+        Task.find_backlinks(task, function(backlinks)
+            local res = ""
+            for _, bl in ipairs(backlinks) do
+                res = res .. utils.pretty_print_backlink(bl) .. "\n"
+            end
+            vim.print(res)
+        end)
+    end
+end
+
 local function add_commands()
     for name, fn in pairs {
         TasksNew = M.new,
@@ -83,6 +108,8 @@ local function add_commands()
         TasksCreateFromTODO = M.create_from_todo,
         TasksList = M.list,
         TasksQfList = M.qf_list,
+        TasksBacklinks = M.backlinks,
+        TasksQfBacklinks = M.qf_backlinks,
     } do
         a.nvim_create_user_command(name, fn, { force = true })
     end

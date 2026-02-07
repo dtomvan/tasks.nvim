@@ -5,5 +5,6 @@ return require("telescope").register_extension {
     end,
     exports = {
         tasks = require("tasks.telescope").picker,
+        backlinks = require("tasks.telescope").backlinks,
     },
 }

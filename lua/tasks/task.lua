@@ -26,6 +26,51 @@ function Task.make_template(title)
     }
 end
 
+---@param database string? path to database
+---@param huid string HUID to lookup in said database
+---@return tasks.Task?
+function Task.by_huid(database, huid)
+    vim.validate("database", database, { "nil", "string" })
+    vim.validate("huid", huid, "string")
+
+    database = database or utils.get_database()
+
+    local task_dir = vim.fs.joinpath(database, huid)
+    local task_file = vim.fs.joinpath(task_dir, "TASK.md")
+
+    local ok, task = pcall(
+        Task.validate,
+        Task.new({
+            huid = huid,
+            task_dir = task_dir,
+            task_file = task_file,
+            -- "" is invalid, so error, but atleast type checking passes
+            title = utils.get_task_title(task_file) or "",
+            priority = tonumber(utils.get_task_priority(task_file)) or 50,
+            state = utils.get_task_state(task_file),
+        })
+    )
+
+    if not ok then
+        vim.notify(("Tasks: invalid task %s: %s"):format(huid, task), vim.log.levels.WARNING)
+    end
+
+    if ok then
+        return task
+    end
+end
+
+---@return tasks.Task
+function Task.from_current_file()
+    local current_huid = vim.fs.basename(vim.fn.expand("%:h:p"))
+    local ok, task = pcall(Task.by_huid, nil, current_huid)
+    if ok and task then
+        return task
+    else
+        vim.notify("Tasks: couldn't find or validate current task file: " .. task, vim.log.levels.ERROR)
+    end
+end
+
 ---@param filter function?
 ---@return tasks.Task[]
 function Task.list(filter)
@@ -37,29 +82,7 @@ function Task.list(filter)
     end
 
     local iter = vim.iter(vim.fs.dir(database)):map(function(x, _)
-        local task_dir = vim.fs.joinpath(database, x)
-        local task_file = vim.fs.joinpath(task_dir, "TASK.md")
-
-        local ok, task = pcall(
-            Task.validate,
-            Task.new({
-                huid = x,
-                task_dir = task_dir,
-                task_file = task_file,
-                -- "" is invalid, so error, but atleast type checking passes
-                title = utils.get_task_title(task_file) or "",
-                priority = tonumber(utils.get_task_priority(task_file)) or 50,
-                state = utils.get_task_state(task_file),
-            })
-        )
-
-        if not ok then
-            vim.notify(("Tasks: invalid task %s: %s"):format(x, task), vim.log.levels.WARNING)
-        end
-
-        if ok then
-            return task
-        end
+        return Task.by_huid(database, x)
     end)
 
     if type(filter) == "function" then
@@ -158,6 +181,53 @@ end
 function Task:pretty_print()
     self:validate()
     return ("<%03d> [%s] %s"):format(self.priority, self.huid, self.title)
+end
+
+---@class tasks.Backlink
+---@field filename string Relative path to file mentioning HUID
+---@field lnum number 1-indexed line number where the backlink is positioned in `file`
+---@field col number 0-indexed column number where the backlink is positioned in `file`
+---@field text string Text in the line after `TASK(HUID): `
+
+---For a task, call back with a list of backlinks in-tree to the task. Uses git grep.
+---@param cb function(tasks.Backlink[])
+function Task:find_backlinks(cb)
+    vim.validate("cb", cb, "function")
+    local root_dir = utils.get_root_dir()
+
+    utils.spawn_output(
+        "git",
+        { "grep", "--fixed-strings", "--null", "--line-number", "--column", ("TASK(%s): "):format(self.huid), root_dir },
+        function(output)
+            ---@type tasks.Backlink[]
+            local res = {}
+            local sanitized_huid = string.gsub(self.huid, "%-", "%%-")
+            -- Git outputs:
+            -- 1. filename
+            -- 2. zero
+            -- 3. lnum
+            -- 4. zero
+            -- 5. col
+            -- 6. zero
+            -- 7. match
+            -- oh i with i has emacs' (rx ...) here
+            local pattern = ("(.+)%%z(%%d+)%%z(%%d+)%%z.*TASK%%(%s%%): (.*)"):format(sanitized_huid)
+            for filename, lnum, col, text in string.gmatch(output, pattern) do
+                ---@type tasks.Backlink
+                local bl = {
+                    filename = filename,
+                    lnum = tonumber(lnum) or error("unreachable"),
+                    col = tonumber(col) or error("unreachable"),
+                    text = vim.trim(text),
+                    user_data = {
+                        huid = self.huid,
+                    },
+                }
+                table.insert(res, bl)
+            end
+            cb(res)
+        end
+    )
 end
 
 return Task

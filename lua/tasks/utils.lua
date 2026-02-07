@@ -107,4 +107,37 @@ end
 M.get_task_priority = M.nil_if_error(M.get_task_field("PRIORITY"))
 M.get_task_state = M.nil_if_error(M.get_task_field("STATE"))
 
+function M.spawn_output(prog, args, cb)
+    local stdout = vim.uv.new_pipe()
+    local output = ""
+    vim.uv.spawn(prog, {
+        args = args,
+        stdio = { nil, stdout, nil },
+    }, function(code, signal)
+        if code ~= 0 or signal ~= 0 then
+            return error(
+                ("Process %s with args %s exited with exit code %d and signal %d"):format(
+                    prog,
+                    vim.inspect(args),
+                    code,
+                    signal
+                )
+            )
+        end
+        cb(output)
+    end)
+    vim.uv.read_start(stdout, function(err, data)
+        assert(not err, err)
+        if data then
+            output = output .. data
+        end
+    end)
+end
+
+---@param bl tasks.Backlink
+---@return string
+function M.pretty_print_backlink(bl)
+    return ("%s:%d:%d: %s"):format(bl.filename, bl.lnum, bl.col, bl.text)
+end
+
 return M

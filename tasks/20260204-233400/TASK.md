@@ -1,6 +1,6 @@
 # Implement backlinks?
 
-- STATE: OPEN
+- STATE: CLOSED
 - PRIORITY: 50
 
 When `TASK(HUID)` is mentioned anywhere in-tree, we could find a backlink to

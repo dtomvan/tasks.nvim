@@ -50,6 +50,11 @@
         )
       );
 
+      fileWithBacklinks = builtins.toFile "test-backlinks.txt" ''
+        TASK(20260201-123456): foo bar
+        TASK(20260204-123434): baz
+      '';
+
       luaTestDriver =
         builtins.toFile "test-tasks.nvim.lua"
           #lua
@@ -124,6 +129,7 @@
           {
             nativeBuildInputs = [
               self'.packages.default
+              pkgs.git
               pkgs.coreutils
               pkgs.xxd
             ];
@@ -133,20 +139,34 @@
             HOME=`mktemp -d`
             cd `mktemp -d`
             cp -r ${fakeTasks} tasks
-            # to trick the plugin into believing this is a git repo
-            mkdir .git
+            cp ${fileWithBacklinks} README
+            git init
+            git add tasks README
+
+            assert_eq () {
+              if ! [ "$output" == "$expected" ]; then
+                echo "expected:"
+                echo
+                echo -n "$expected" | xxd
+                echo "actual:"
+                echo
+                echo -n "$output" | xxd
+                exit 1
+              fi
+            }
 
             output="$(nvim --headless +TasksList +qa! 2>&1)"
             expected=$'<100> [20260205-123456] Very Important Task\r\n<050> [20260201-123456] Another open task\r'
-            if ! [ "$output" == "$expected" ]; then
-              echo "expected:"
-              echo
-              echo -n "$expected" | xxd
-              echo "actual:"
-              echo
-              echo -n "$output" | xxd
-              exit 1
-            fi
+            assert_eq
+
+            output="$(nvim --headless +'e tasks/20260201-123456/TASK.md' +TasksBacklinks +qa! 2>&1)"
+            expected=$'README:1:1: foo bar\r'
+            assert_eq
+
+            output="$(nvim --headless +'e tasks/20260204-123434/TASK.md' +TasksBacklinks +qa! 2>&1)"
+            expected=$'README:2:1: baz\r'
+            assert_eq
+
             nvim -l ${luaTestDriver}
 
             touch $out
