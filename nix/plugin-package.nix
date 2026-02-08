@@ -1,3 +1,4 @@
+{ self, ... }:
 {
   perSystem =
     { pkgs, lib, ... }:
@@ -6,7 +7,9 @@
     in
     {
       packages.plugin = pkgs.vimUtils.buildVimPlugin {
-        name = "tasks";
+        pname = "tasks";
+        version =
+          self.sourceInfo.shortRev or "${self.sourceInfo.dirtyShortRev}-${self.sourceInfo.lastModifiedDate}";
         src = toSource {
           root = ../.;
           fileset = unions [
