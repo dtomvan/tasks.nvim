@@ -45,7 +45,7 @@ function M.get_huid()
 end
 
 function M.get_root_dir()
-    return vim.fs.root(vim.uv.cwd(), ".git")
+    return vim.fs.root(vim.uv.cwd(), { ".git", "tasks" })
 end
 
 function M.get_database()
