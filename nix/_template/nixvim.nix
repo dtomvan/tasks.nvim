@@ -2,7 +2,7 @@
   plugins.tasks = {
     enable = true;
     withTelescope = true;
-    withCmp = true;
+    withBlink = true;
     settings = {
       add_commands = true;
     };

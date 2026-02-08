@@ -17,6 +17,7 @@ this codebase got more and more complex as I went down the rabbit hole.
 - Find backlinks (yes, also between tasks)
 - [Telescope](https://github.com/nvim-telescope/telescope.nvim) integration
 - [nvim-cmp](https://github.com/hrsh7th/nvim-cmp) integration
+- [blink.cmp](https://github.com/saghen/blink.cmp) integration
 
 ## Usage
 
@@ -25,7 +26,7 @@ use `git grep` to search through all tracked files in the codebase.
 
 <details>
 <summary>Built-in nvim package management</summary>
-OPTIONAL: install telescope and nvim-cmp for a better experience
+OPTIONAL: install telescope and nvim-cmp (or blink.cmp) for a better experience
 
 ```lua
 require'tasks'.setup { add_commands = true }
@@ -44,6 +45,19 @@ vim.keymap.set("n", "<leader>tb", "<cmd>Telescope tasks backlinks<cr>")
 
 -- OPTIONAL: cmp source
 require'cmp'.setup { sources = { { name = 'tasks' } } }
+
+-- OPTIONAL: blink.cmp source
+require'blink.cmp'.setup {
+    sources = {
+        default = { 'tasks' },
+        providers = {
+            tasks = {
+                name = 'Tasks',
+                module = 'tasks.blink_source',
+            }
+        }
+    }
+}
 ```
 </details>
 
@@ -68,7 +82,23 @@ return {
             { "<leader>tb", function() require'tasks.telescope'.backlinks() end, desc = "Telescope backlinks" },
         },
     },
+    -- Choose ONE of the following:
     { "hrsh7th/nvim-cmp", opts = { sources = { { name = "tasks" } }, dependencies = { "dtomvan/tasks.nvim" } } },
+    {
+        "saghen/blink.cmp",
+        opts = {
+            sources = {
+                default = { 'tasks' },
+                providers = {
+                    tasks = {
+                        name = 'Tasks',
+                        module = 'tasks.blink_source',
+                    }
+                }
+            }
+        },
+        dependencies = { "dtomvan/tasks.nvim" },
+    },
 }
 ```
 
@@ -101,7 +131,7 @@ nix flake init -t github:dtomvan/tasks.nvim
     plugins.tasks = {
       enable = true;
       withTelescope = true;
-      withCmp = true;
+      withBlink = true;
       settings = {
         add_commands = true;
       };

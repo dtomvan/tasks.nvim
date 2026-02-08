@@ -31,6 +31,7 @@
         };
         withTelescope = lib.mkEnableOption "telescope integration for tasks.nvim";
         withCmp = lib.mkEnableOption "nvim-cmp integration for tasks.nvim";
+        withBlink = lib.mkEnableOption "blink.cmp integration for tasks.nvim";
       };
 
       config = lib.mkIf cfg.enable {
@@ -48,6 +49,19 @@
         plugins.cmp = lib.mkIf cfg.withCmp {
           enable = true;
           settings.sources = lib.singleton { name = "tasks"; };
+        };
+
+        plugins.blink-cmp = lib.mkIf cfg.withBlink {
+          enable = true;
+          settings = {
+            sources = {
+              default = lib.singleton "tasks";
+              providers.tasks = {
+                name = "Tasks";
+                module = "tasks.blink_source";
+              };
+            };
+          };
         };
       };
     };
