@@ -10,7 +10,9 @@ function source.new(opts)
     return self
 end
 
-function source:get_trigger_characters() return { '(' } end
+function source:get_trigger_characters()
+    return { "(" }
+end
 
 ---@param ctx blink.cmp.Context
 function source:get_completions(ctx, callback)
@@ -31,13 +33,13 @@ function source:get_completions(ctx, callback)
         local item = {
             label = task.huid,
             label_details = { description = task.task_file },
-            kind = require('blink.cmp.types').CompletionItemKind.Text,
+            kind = require("blink.cmp.types").CompletionItemKind.Text,
 
             textEdit = {
                 newText = task.huid .. ")",
                 range = {
                     start = { line = ctx.cursor[1] - 1, character = task_end },
-                    ['end'] = { line = ctx.cursor[1] - 1, character = ctx.cursor[2] },
+                    ["end"] = { line = ctx.cursor[1] - 1, character = ctx.cursor[2] },
                 },
             },
 
@@ -57,7 +59,7 @@ function source:resolve(item, callback)
     item = vim.deepcopy(item)
 
     item.documentation = {
-        kind = 'markdown',
+        kind = "markdown",
         value = io.open(item.label_details.description):read("*all"),
     }
 

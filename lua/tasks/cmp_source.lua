@@ -45,7 +45,7 @@ source.complete = function(self, params, callback)
                 newText = task.huid .. ")",
                 range = {
                     start = { line = params.context.cursor.line, character = task_end },
-                    ['end'] = { line = params.context.cursor.line, character = params.context.cursor.character },
+                    ["end"] = { line = params.context.cursor.line, character = params.context.cursor.character },
                 },
             },
             dup = 0,
