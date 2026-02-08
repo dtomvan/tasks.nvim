@@ -26,21 +26,30 @@ source.complete = function(self, params, callback)
 
     -- for now, let's assume it's cheap to list all available tasks
 
-    local input = string.sub(params.context.cursor_before_line, params.offset)
+    local task_begin, task_end = string.find(params.context.cursor_before_line, "TASK(", 1, true)
+    if not task_begin then
+        return callback {
+            items = {},
+        }
+    end
+
     local items = {}
-    -- TODO: factor out list_huids
     local tasks = Task.list()
     for _, task in ipairs(tasks) do
-        if vim.startswith(task.huid, input) and task.huid ~= input then
-            table.insert(items, {
-                label = task.huid,
-                label_details = { description = task.task_file },
-                kind = "file",
-                documentation = io.open(task.task_file):read("*all"),
-                insert_text = task.huid .. ")",
-                dup = 0,
-            })
-        end
+        table.insert(items, {
+            label = task.huid,
+            label_details = { description = task.task_file },
+            kind = "file",
+            documentation = io.open(task.task_file):read("*all"),
+            textEdit = {
+                newText = task.huid .. ")",
+                range = {
+                    start = { line = params.context.cursor.line, character = task_end },
+                    ['end'] = { line = params.context.cursor.line, character = params.context.cursor.character },
+                },
+            },
+            dup = 0,
+        })
     end
 
     callback({
