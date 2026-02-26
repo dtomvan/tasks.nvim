@@ -4,6 +4,11 @@ on:
   push:
     tags:
       - v**
+  workflow_dispatch:
+    inputs:
+      tag:
+        type: string
+        required: true
 
 permissions:
   contents: write
@@ -12,12 +17,21 @@ jobs:
   build-artifacts:
     strategy:
       matrix:
-        os: [ubuntu-latest ubuntu-24.04-arm macos-latest]
+        os:
+          - ubuntu-latest
+          - ubuntu-24.04-arm
+          - macos-latest
     runs-on: ${{ matrix.os }}
-    outputs:
-      artifacts: ${{ steps.upload.outputs.artifact-url }}
     steps:
+      - name: Set tag for workflow_dispatch
+        if: github.event_name == 'workflow_dispatch'
+        run: echo "GITHUB_REF_NAME=${{ inputs.tag }}" >> $GITHUB_ENV
       - uses: actions/checkout@v4
+        if: github.event_name == 'workflow_dispatch'
+        with:
+          ref: ${{ inputs.tag }}
+      - uses: actions/checkout@v4
+        if: github.event_name != 'workflow_dispatch'
       - uses: cachix/install-nix-action@v30
       - name: Build source
         if: matrix.os == 'ubuntu-latest'
@@ -34,7 +48,6 @@ jobs:
             -o results/nvim-with-tasks-$GITHUB_REF_NAME-$(nix-instantiate --eval --raw --expr builtins.currentSystem)
 
       - uses: actions/upload-artifact@v4
-        id: upload
         with:
           name: artifact-${{ matrix.os }}
           path: results/*
@@ -50,3 +63,5 @@ jobs:
       - name: Create release
         run: |
           gh release create $GITHUB_REF_NAME artifacts/*
+        env:
+          GH_TOKEN: ${{ github.token }}
