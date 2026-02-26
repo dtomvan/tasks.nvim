@@ -1,0 +1,52 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - v**
+
+permissions:
+  contents: write
+
+jobs:
+  build-artifacts:
+    strategy:
+      matrix:
+        os: [ubuntu-latest ubuntu-24.04-arm macos-latest]
+    runs-on: ${{ matrix.os }}
+    outputs:
+      artifacts: ${{ steps.upload.outputs.artifact-url }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: cachix/install-nix-action@v30
+      - name: Build source
+        if: matrix.os == "ubuntu-latest"
+        run: |
+          tar -czvf results/tasks-$GITHUB_REF_NAME.tar.gz \
+            -C $(nix build .#plugin.src --print-out-paths) \
+            . \
+            --transform="s/^\\./tasks-$GITHUB_REF_NAME/"
+      - name: Build wrapper
+        run: |
+          mkdir results
+
+          nix bundle .#wrapper \ 
+            -o results/nvim-with-tasks-$GITHUB_REF_NAME-$(nix-instantiate --eval --raw --expr builtins.currentSystem)
+
+      - uses: actions/upload-artifact@v4
+        id: upload
+        with:
+          name: artifact-${{ matrix.os }}
+          path: results/*
+  create-release:
+    runs-on: ubuntu-slim
+    steps:
+      - name: Download all artifacts
+        uses: actions/download-artifact@v7
+        with:
+          pattern: artifact-*
+          path: artifacts
+          merge-multiple: true
+      - name: Create release
+        run: |
+          gh release create $GITHUB_REF_NAME artifacts/*
