@@ -53,6 +53,7 @@ jobs:
           path: results/*
   create-release:
     runs-on: ubuntu-slim
+    needs: build-artifacts
     steps:
       - name: Download all artifacts
         uses: actions/download-artifact@v7
