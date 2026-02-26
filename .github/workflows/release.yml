@@ -21,19 +21,14 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: cachix/install-nix-action@v30
+      - run: mkdir results
       - name: Build source
         if: matrix.os == 'ubuntu-latest'
         run: |
-          tar -czvf results/tasks-$GITHUB_REF_NAME.tar.gz \
-            -C $(nix build .#plugin.src --print-out-paths) \
-            . \
-            --transform="s/^\\./tasks-$GITHUB_REF_NAME/"
+          tar -czvf results/tasks-$GITHUB_REF_NAME.tar.gz -C $(nix eval --raw .#plugin.src.outPath) . --transform="s/^\\./tasks-$GITHUB_REF_NAME/"
       - name: Build wrapper
         run: |
-          mkdir results
-
-          nix bundle .#wrapper \ 
-            -o results/nvim-with-tasks-$GITHUB_REF_NAME-$(nix-instantiate --eval --raw --expr builtins.currentSystem)
+          nix bundle .#wrapper --bundler github:NixOS/bundlers#toAppImage -o results/nvim-with-tasks-$GITHUB_REF_NAME-$(nix-instantiate --eval --raw --expr builtins.currentSystem).AppImage
 
       - uses: actions/upload-artifact@v4
         with:
@@ -51,6 +46,6 @@ jobs:
           merge-multiple: true
       - name: Create release
         run: |
-          gh release create $GITHUB_REF_NAME artifacts/*
+          gh release create $GITHUB_REF_NAME artifacts/**
         env:
           GH_TOKEN: ${{ github.token }}
