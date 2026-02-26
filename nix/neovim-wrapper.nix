@@ -17,6 +17,8 @@
           withBlink ? true,
         }:
         wrapNeovimUnstable neovim-unwrapped {
+          withPython3 = false;
+          withRuby = false;
           luaRcContent =
             #lua
             ''
