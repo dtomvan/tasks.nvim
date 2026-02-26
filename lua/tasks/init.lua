@@ -101,6 +101,14 @@ function M.backlinks()
     end
 end
 
+function M.help()
+    print("Usage: Tasks <COMMAND>")
+    print("Where COMMAND is one of:")
+    for c, _ in vim.spairs(M.COMMANDS) do
+        print(" - " .. c)
+    end
+end
+
 M.COMMANDS = {
     new = M.new,
     ["goto"] = M.go_to,
@@ -109,6 +117,7 @@ M.COMMANDS = {
     ["qf-list"] = M.qf_list,
     backlinks = M.backlinks,
     ["qf-backlinks"] = M.qf_backlinks,
+    help = M.help,
 }
 
 M.COMMAND_LIST = {}
