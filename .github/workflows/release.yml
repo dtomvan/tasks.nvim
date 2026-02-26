@@ -28,7 +28,7 @@ jobs:
           tar -czvf results/tasks-$GITHUB_REF_NAME.tar.gz -C $(nix eval --raw .#plugin.src.outPath) . --transform="s/^\\./tasks-$GITHUB_REF_NAME/"
       - name: Build wrapper
         run: |
-          nix bundle .#wrapper --bundler github:NixOS/bundlers#toAppImage -o results/nvim-with-tasks-$GITHUB_REF_NAME-$(nix-instantiate --eval --raw --expr builtins.currentSystem).AppImage
+          nix bundle .#wrapper --bundler github:NixOS/bundlers#toAppImage -o results/nvim-with-tasks-$GITHUB_REF_NAME-$(nix eval --impure --raw --expr builtins.currentSystem).AppImage
 
       - uses: actions/upload-artifact@v4
         with:
