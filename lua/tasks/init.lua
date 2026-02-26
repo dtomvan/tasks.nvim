@@ -127,7 +127,11 @@ for n, _ in pairs(M.COMMANDS) do
 end
 
 function M.interactive(e)
-    M.COMMANDS[e.fargs[1]](unpack(vim.list_slice(e.fargs, 2)))
+    local cmd = e.fargs[1]
+    if not vim.tbl_contains(M.COMMAND_LIST, cmd) then
+        return M.help()
+    end
+    M.COMMANDS[cmd](unpack(vim.list_slice(e.fargs, 2)))
 end
 
 local function add_commands()
