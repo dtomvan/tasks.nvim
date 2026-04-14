@@ -60,6 +60,23 @@ function M.list()
     vim.print(res)
 end
 
+function M.open(huid)
+    if huid ~= nil then
+        return vim.cmd.split(Task.by_huid(nil, huid).task_file)
+    end
+
+    local tasks = Task.list(filters.is_open)
+    vim.ui.select(tasks, {
+        prompt = "Open a task:",
+        format_item = Task.pretty_print,
+    }, function(choice)
+        if choice == nil or not pcall(Task.validate, choice) then
+            return
+        end
+        vim.cmd.split(choice.task_file)
+    end)
+end
+
 function M.qf_list()
     local cwd = vim.uv.cwd()
     local tasks = Task.list(filters.is_open)
@@ -118,6 +135,7 @@ M.COMMANDS = {
     backlinks = M.backlinks,
     ["qf-backlinks"] = M.qf_backlinks,
     help = M.help,
+    open = M.open,
 }
 
 M.COMMAND_LIST = {}
@@ -135,10 +153,21 @@ function M.interactive(e)
 end
 
 local function add_commands()
-    a.nvim_create_user_command("Tasks", M.interactive, {
+    local name = "Tasks"
+    a.nvim_create_user_command(name, M.interactive, {
         nargs = "+",
         force = true,
-        complete = function(lead)
+        complete = function(lead, cmdline)
+            if vim.startswith(cmdline, name .. " open") then
+                return vim.iter(Task.list(filters.is_open))
+                    :filter(function(t)
+                        return vim.startswith(t.huid, lead)
+                    end)
+                    :map(function(t)
+                        return t.huid
+                    end)
+                    :totable()
+            end
             return vim.iter(M.COMMAND_LIST)
                 :filter(function(c)
                     return vim.startswith(c, lead)
