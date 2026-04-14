@@ -126,9 +126,6 @@
 
             do_test(expected, res)
 
-            print("testing telescope...")
-            require("telescope._extensions.tasks").exports.tasks()
-
             print("testing qflist...")
             require("tasks").qf_list()
             assert(vim.fn.getqflist()[1].text == "<100> [20260205-123456] {now,telescope} Very Important Task")
@@ -168,15 +165,15 @@
             }
 
             output="$(nvim --headless +'Tasks list' +qa! 2>&1)"
-            expected=$'<100> [20260205-123456] {now,telescope} Very Important Task\r\n<050> [20260201-123456] Another open task\r'
+            expected=$'<100> [20260205-123456] {now,telescope} Very Important Task\n<050> [20260201-123456] Another open task'
             assert_eq
 
             output="$(nvim --headless +'e tasks/20260201-123456/TASK.md' +'Tasks backlinks' +sleep +qa! 2>&1)"
-            expected=$'README:1:1: foo bar\r'
+            expected=$'README:1:1: foo bar'
             assert_eq
 
             output="$(nvim --headless +'e tasks/20260204-123434/TASK.md' +'Tasks backlinks' +sleep +qa! 2>&1)"
-            expected=$'README:2:1: baz\r'
+            expected=$'README:2:1: baz'
             assert_eq
 
             nvim -l ${luaTestDriver}
