@@ -157,22 +157,15 @@ local function add_commands()
     a.nvim_create_user_command(name, M.interactive, {
         nargs = "+",
         force = true,
-        complete = function(lead, cmdline)
+        complete = function(_, cmdline)
             if vim.startswith(cmdline, name .. " open") then
                 return vim.iter(Task.list(filters.is_open))
-                    :filter(function(t)
-                        return vim.startswith(t.huid, lead)
-                    end)
                     :map(function(t)
                         return t.huid
                     end)
                     :totable()
             end
-            return vim.iter(M.COMMAND_LIST)
-                :filter(function(c)
-                    return vim.startswith(c, lead)
-                end)
-                :totable()
+            return M.COMMAND_LIST
         end,
     })
 end
