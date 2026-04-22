@@ -29,6 +29,15 @@ use `git grep` to search through all tracked files in the codebase.
 OPTIONAL: install telescope and nvim-cmp (or blink.cmp) for a better experience
 
 ```lua
+-- OPTIONAL: install through vim.pack, Nvim 0.12.x+
+vim.pack.add {
+    "https://github.com/dtomvan/tasks.nvim",
+    "https://github.com/saghen/blink.cmp", -- OPTIONAL: for blink completion
+    "https://github.com/nvim-lua/plenary.nvim", -- OPTIONAL: for blink
+    "https://github.com/hrsh7th/nvim-cmp", -- OPTIONAL: for nvim-cmp completion
+    "https://github.com/nvim-telescope/telescope.nvim", -- OPTIONAL: for fuzzy finding through tasks list
+}
+
 require'tasks'.setup { add_commands = true }
 vim.keymap.set("n", "<leader>tg", require'tasks'.go_to)
 vim.keymap.set("n", "<leader>tn", require'tasks'.create_from_todo)
