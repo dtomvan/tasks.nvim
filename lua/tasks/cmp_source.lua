@@ -35,6 +35,10 @@ source.complete = function(self, params, callback)
 
     local items = {}
     local tasks = Task.list()
+    if not vim.islist(tasks) then
+        return
+    end
+    ---@cast tasks tasks.Task[]
     for _, task in ipairs(tasks) do
         table.insert(items, {
             label = task.huid,

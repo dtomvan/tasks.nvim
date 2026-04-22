@@ -40,11 +40,15 @@ local M = {}
 local function make_picker(title, fn)
     return function(opts)
         opts = opts or {}
+        local results = fn()
+        if not vim.islist(results) then
+            return
+        end
         return pickers
             .new(opts, {
                 prompt_title = title,
                 finder = finders.new_table {
-                    results = fn(),
+                    results = results,
                     ---@param entry tasks.Task
                     entry_maker = function(entry)
                         return {

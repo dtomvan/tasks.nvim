@@ -28,6 +28,10 @@ function source:get_completions(ctx, callback)
 
     local items = {}
     local tasks = Task.list()
+    if not vim.islist(tasks) then
+        return
+    end
+    ---@cast tasks tasks.Task[]
     for _, task in ipairs(tasks) do
         --- @type lsp.CompletionItem
         local item = {

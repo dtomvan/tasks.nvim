@@ -54,6 +54,10 @@ end
 function M.list()
     local tasks = Task.list(filters.is_open)
     local res = ""
+    if not vim.islist(tasks) then
+        return
+    end
+    ---@cast tasks tasks.Task[]
     for _, task in ipairs(tasks) do
         res = res .. Task.pretty_print(task) .. "\n"
     end
@@ -66,6 +70,10 @@ function M.open(huid)
     end
 
     local tasks = Task.list(filters.is_open)
+    if not vim.islist(tasks) then
+        return
+    end
+    ---@cast tasks tasks.Task[]
     vim.ui.select(tasks, {
         prompt = "Open a task:",
         format_item = Task.pretty_print,
@@ -80,6 +88,10 @@ end
 function M.qf_list()
     local cwd = vim.uv.cwd()
     local tasks = Task.list(filters.is_open)
+    if not vim.islist(tasks) then
+        return
+    end
+    ---@cast tasks tasks.Task[]
     local res = {}
     for _, task in ipairs(tasks) do
         table.insert(res, {
@@ -158,8 +170,13 @@ local function add_commands()
         nargs = "+",
         force = true,
         complete = function(_, cmdline)
-            if vim.startswith(cmdline, name .. " open") then
-                return vim.iter(Task.list(filters.is_open))
+            if vim.startswith(cmdline, name .. " open") and utils.get_database() then
+                local tasks = Task.list(filters.is_open)
+                if not vim.islist(tasks) then
+                    return M.COMMAND_LIST
+                end
+                ---@cast tasks tasks.Task[]
+                return vim.iter(tasks)
                     :map(function(t)
                         return t.huid
                     end)

@@ -77,7 +77,7 @@ function Task.from_current_file()
 end
 
 ---@param filter function?
----@return tasks.Task[]
+---@return tasks.Task[]?
 function Task.list(filter)
     vim.validate("filter", filter, { "nil", "function" })
 
