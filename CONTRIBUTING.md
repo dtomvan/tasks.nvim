@@ -14,7 +14,7 @@ Also useful:
 
 Don't submit any issues via the "Issues" tab in GitHub, rather, send a PR,
 where a `tasks/<HUID>/TASK.md` file is being proposed. Refer to the format of
-other existing tasks or use `TaskNew` from this plugin.
+other existing tasks or use `Tasks new` from this plugin.
 
 ## Testing
 
