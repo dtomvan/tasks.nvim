@@ -24,6 +24,13 @@ this codebase got more and more complex as I went down the rabbit hole.
 Required for backlink search: use a Git repository. Currently it's hardcoded to
 use `git grep` to search through all tracked files in the codebase.
 
+There's also an Appimage in the [releases](https://github.com/dtomvan/tasks.nvim/releases/latest) with
+Telescope and blink available for testing out the plugin in a minimal,
+temporary environment before integrating it into your config. Keep in mind that
+the actual version of Nvim can and will lag behind the latest upstream version.
+
+When ready to install the plugin in your own config, use one of these methods:
+
 <details>
 <summary>Built-in nvim package management</summary>
 OPTIONAL: install telescope and nvim-cmp (or blink.cmp) for a better experience
