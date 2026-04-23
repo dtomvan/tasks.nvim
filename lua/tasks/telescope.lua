@@ -25,16 +25,6 @@ local displayer = entry_display.create {
     },
 }
 
-local function format_priority(p)
-    local hi = "DiagnosticWarn"
-    if p < 33 then
-        hi = "DiagnosticOk"
-    elseif p > 66 then
-        hi = "DiagnosticError"
-    end
-    return { ("%03d"):format(p), hi }
-end
-
 local M = {}
 
 local function make_picker(title, fn)
@@ -55,7 +45,7 @@ local function make_picker(title, fn)
                             value = entry,
                             display = function(e)
                                 return displayer {
-                                    format_priority(e.value.priority),
+                                    Task.format_priority(e.value),
                                     { e.value.huid, "Comment" },
                                     { table.concat(e.value.tags, ","), "DiagnosticInfo" },
                                     e.value.title,

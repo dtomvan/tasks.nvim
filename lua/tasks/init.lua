@@ -53,15 +53,15 @@ end
 
 function M.list()
     local tasks = Task.list(filters.is_open)
-    local res = ""
+    local res = {}
     if not vim.islist(tasks) then
         return
     end
     ---@cast tasks tasks.Task[]
     for _, task in ipairs(tasks) do
-        res = res .. Task.pretty_print(task) .. "\n"
+        vim.list_extend(res, task:pretty_print_highlighted())
     end
-    vim.print(res)
+    vim.api.nvim_echo(res, true, {})
 end
 
 function M.open(huid)

@@ -198,6 +198,50 @@ function Task:pretty_print()
     return ("<%03d> [%s]%s %s"):format(self.priority, self.huid, maybe_tags, self.title)
 end
 
+---Returns `vim.api.nvim_echo`-able colored priority number.
+---@return string[]
+function Task:format_priority()
+    local p = self.priority
+    local hi = "DiagnosticWarn"
+    if p < 33 then
+        hi = "DiagnosticOk"
+    elseif p > 66 then
+        hi = "DiagnosticError"
+    end
+    return { ("%03d"):format(p), hi }
+end
+
+---Does the same as Task:pretty_print(), but then for vim.api.nvim_echo
+---@return string[][]
+function Task:pretty_print_highlighted()
+    self:validate()
+    local chunks = {
+        { "<", "Normal" },
+        self:format_priority(),
+        { "> [", "Normal" },
+        { self.huid, "Comment" },
+        { "] ", "Normal" },
+    }
+
+    if self.tags[1] ~= nil then
+        local is_first = true
+        table.insert(chunks, { "{", "Normal" })
+        for _, tag in ipairs(self.tags) do
+            if not is_first then
+                table.insert(chunks, { ",", "Comment" })
+            else
+                is_first = false
+            end
+            table.insert(chunks, { tag, "DiagnosticInfo" })
+        end
+        table.insert(chunks, { "} ", "Normal" })
+    end
+
+    table.insert(chunks, { self.title, "Italic" })
+    table.insert(chunks, { "\n", "Normal" })
+    return chunks
+end
+
 ---@class tasks.Backlink
 ---@field filename string Relative path to file mentioning HUID
 ---@field lnum number 1-indexed line number where the backlink is positioned in `file`
