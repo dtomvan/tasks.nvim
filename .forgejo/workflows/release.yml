@@ -26,5 +26,6 @@ jobs:
             --tag $FORGEJO_REF_NAME \
             --attach *.tar.gz \
             --attach *.AppImage \
-            --draft
+            --draft \
+            "$FORGEJO_REF_NAME"
 
