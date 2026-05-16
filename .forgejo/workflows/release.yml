@@ -1,0 +1,30 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - v**
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build-artifacts:
+    runs-on: nix
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build source
+        run: |
+          tar -czvf tasks-$FORGEJO_REF_NAME.tar.gz -C $(nix eval --raw .#plugin.src.outPath) . --transform="s/^\\./tasks-$FORGEJO_REF_NAME/"
+      - name: Build wrapper
+        run: |
+          nix bundle .#wrapper --bundler github:NixOS/bundlers#toAppImage -o nvim-with-tasks-$FORGEJO_REF_NAME-$(nix eval --impure --raw --expr builtins.currentSystem).AppImage
+      - name: Create release
+        run: |
+          fj release create \
+            --tag $FORGEJO_REF_NAME \
+            --attach *.tar.gz \
+            --attach *.AppImage \
+            --draft
+

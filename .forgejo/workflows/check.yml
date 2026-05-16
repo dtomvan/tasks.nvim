@@ -1,0 +1,15 @@
+name: Nix Flake actions
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+jobs:
+  nix-matrix:
+    runs-on: nix
+    steps:
+      - uses: actions/checkout@v4
+      - run: nix build -L '.#checks.x86_64-linux.integration'
+      - run: nix build -L '.#checks.x86_64-linux.treefmt'
