@@ -40,6 +40,11 @@ function Task.by_huid(database, huid)
     local task_dir = vim.fs.joinpath(database, huid)
     local task_file = vim.fs.joinpath(task_dir, "TASK.md")
 
+    if vim.uv.fs_stat(task_file) == nil then
+        vim.notify(("Tasks: empty task directory for %s"):format(huid), vim.log.levels.WARN)
+        return
+    end
+
     local tags = utils.get_task_tags(task_file)
 
     local ok, task = pcall(
@@ -57,7 +62,7 @@ function Task.by_huid(database, huid)
     )
 
     if not ok then
-        vim.notify(("Tasks: invalid task %s: %s"):format(huid, task), vim.log.levels.WARNING)
+        vim.notify(("Tasks: invalid task %s: %s"):format(huid, task), vim.log.levels.WARN)
     end
 
     if ok then
@@ -216,11 +221,11 @@ end
 function Task:pretty_print_highlighted()
     self:validate()
     local chunks = {
-        { "<", "Normal" },
+        { "<",       "Normal" },
         self:format_priority(),
-        { "> [", "Normal" },
+        { "> [",     "Normal" },
         { self.huid, "Comment" },
-        { "] ", "Normal" },
+        { "] ",      "Normal" },
     }
 
     if self.tags[1] ~= nil then
